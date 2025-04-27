@@ -1,5 +1,6 @@
 // ملف مشترك لجميع طلبات API
-const API_KEY = '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'; // احذر! لا تضع المفتاح هنا مباشرة في الإنتاج
+const API_KEY = import.meta.env.VITE_API_KEY || 'fallback-key'; // للاستخدام مع Vite
+ // احذر! لا تضع المفتاح هنا مباشرة في الإنتاج
 const API_HOST = 'api-football-v1.p.rapidapi.com';
 
 // دالة مساعدة للطلب من API
@@ -76,4 +77,4 @@ const FootballAPI = {
     }
 };
 
-export default RAPIDAPI_KEY;
+export default FootballAPI;
