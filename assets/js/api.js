@@ -77,4 +77,3 @@ const FootballAPI = {
     }
 };
 
-export  'FootballAPI' ;
