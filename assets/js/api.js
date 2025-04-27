@@ -77,4 +77,4 @@ const FootballAPI = {
     }
 };
 
-' export'  FootballAPI ;
+export  'FootballAPI' ;
