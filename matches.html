@@ -53,28 +53,18 @@
                 </div>
             </div>
 
-            <!-- Today Matches Section -->
-            <section id="today-section" class="matches-section">
-                <h2><i class="far fa-calendar-alt"></i> مباريات اليوم</h2>
-                <span class="date-display" id="today-date"></span>
-                <div id="today-matches" class="matches-container">
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i> جاري تحميل مباريات اليوم...
-                    </div>
+            <!-- Matches Containers -->
+            <div id="today-matches" class="matches-container">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل مباريات اليوم...
                 </div>
-            </section>
-                           <div id="today-matches"></div>
-                           <div id="tomorrow-matches"></div>
-            <!-- Tomorrow Matches Section -->
-            <section id="tomorrow-section" class="matches-section">
-                <h2><i class="far fa-calendar-check"></i> مباريات الغد</h2>
-                <span class="date-display" id="tomorrow-date"></span>
-                <div id="tomorrow-matches" class="matches-container">
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i> جاري تحميل مباريات الغد...
-                    </div>
+            </div>
+
+            <div id="tomorrow-matches" class="matches-container">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل مباريات الغد...
                 </div>
-            </section>
+            </div>
 
             <!-- Error Container -->
             <div id="error-container" class="error-container" style="display: none;"></div>
@@ -90,17 +80,27 @@
 
     <!-- Scripts -->
     <script type="module">
-        // تهيئة البيئة للاستخدام مع GitHub Pages
+        // تهيئة البيئة
         window.ENV = {
             RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'
         };
 
+        // استيراد FootballAPI
+        import { FootballAPI } from './assets/js/api.js';
+        import { MatchRenderer } from './assets/js/matches.js';
+
         // تحديث سنة حقوق النشر
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // استيراد الملفات
-        import FootballAPI from './assets/js/api.js';
-        import './assets/js/matches.js';
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', () => {
+            MatchRenderer.init();
+            
+            // للاختبار (يمكن حذفها لاحقاً)
+            FootballAPI.getMatchesByDate('2025-04-28')
+                .then(data => console.log('Test API call:', data))
+                .catch(error => console.error('Test API error:', error));
+        });
     </script>
 </body>
 </html>
