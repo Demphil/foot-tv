@@ -1,4 +1,4 @@
-import FootballAPI from './api.js';
+export FootballAPI from './api.js';
 
 // وظائف عامة للموقع
 document.addEventListener('DOMContentLoaded', () => {
