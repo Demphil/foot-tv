@@ -1,5 +1,5 @@
 // ملف مشترك لجميع طلبات API
-const API_KEY = import.meta.env.VITE_API_KEY || 'fallback-key'; // للاستخدام مع Vite
+const API_KEY = process.env.RAPIDAPI_KEY || 'fallback-key';
  // احذر! لا تضع المفتاح هنا مباشرة في الإنتاج
 const API_HOST = 'api-football-v1.p.rapidapi.com';
 
