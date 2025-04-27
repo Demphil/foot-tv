@@ -138,3 +138,9 @@ renderMatchesByDate(matches) {
   matchesContainer.innerHTML = '';
   //... rest of the code
 }
+// main.js
+import { fetchData, apiVersion } from './api.js'; // Import named exports
+
+// Now you can use fetchData and apiVersion
+fetchData().then((data) => console.log(data));
+console.log(apiVersion);
