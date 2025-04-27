@@ -77,4 +77,4 @@ const FootballAPI = {
     }
 };
 
-export default FootballAPI;
+' export'  FootballAPI ;
