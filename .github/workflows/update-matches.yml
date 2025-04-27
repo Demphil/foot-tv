@@ -22,15 +22,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'npm'  # تم التعليق أو إزالة هذا السطر إذا لم يكن هناك package-lock.json
 
       - name: Create Data Directory
         run: |
           mkdir -p data
           touch data/matches.json
 
-      - name: Install Dependencies
-        run: npm install axios
+      - name: Install Axios Directly
+        run: npm install axios --no-package-lock  # حل المشكلة بعدم إنشاء ملف lock
 
       - name: Fetch Latest Matches
         env:
@@ -62,7 +62,7 @@ jobs:
               
             } catch (error) {
               console.error('API Error:', error.message);
-              // Generate fallback data if API fails
+              // Generate fallback data
               const fallbackData = {
                 response: [
                   {
