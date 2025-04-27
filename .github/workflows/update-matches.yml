@@ -16,21 +16,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js (without cache)
+      - name: Set up Node.js (No Cache)
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: false  # تعطيل التخزين المؤقت لتجنب مشكلة lock file
+          # تم إزالة سطر cache تماماً بدلاً من تعطيله
 
-      - name: Initialize Node.js project
+      - name: Initialize Minimal Project
         run: |
           mkdir -p data
-          echo '{"name":"foot-tv-updater","version":"1.0.0","private":true}' > package.json
+          echo '{"name":"ft-updater","private":true}' > package.json
 
-      - name: Install Axios directly
-        run: npm install axios --no-package-lock --no-save  # تثبيت بدون إنشاء lock file
+      - name: Install Axios (No Lock)
+        run: npm install axios --no-package-lock --no-save --prefer-offline
 
-      - name: Fetch and Update Matches Data
+      - name: Fetch and Process Matches
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: |
@@ -39,9 +39,10 @@ jobs:
           const fs = require('fs');
           const today = new Date().toISOString().split('T')[0];
           
-          async function fetchMatches() {
+          async function getMatches() {
             try {
-              const response = await axios.get('https://api-football-v1.p.rapidapi.com/v3/fixtures', {
+              console.log('🔍 جلب بيانات المباريات...');
+              const { data } = await axios.get('https://api-football-v1.p.rapidapi.com/v3/fixtures', {
                 params: { date: today },
                 headers: {
                   'x-rapidapi-host': 'api-football-v1.p.rapidapi.com',
@@ -49,27 +50,39 @@ jobs:
                 }
               });
               
-              fs.writeFileSync('./data/matches.json', JSON.stringify(response.data, null, 2));
-              console.log('✅ تم تحديث البيانات بنجاح');
+              fs.writeFileSync('./data/matches.json', JSON.stringify(data, null, 2));
+              console.log('✅ تم التحديث بنجاح:', data.response?.length || 0, 'مباراة');
             } catch (error) {
-              console.error('❌ خطأ في جلب البيانات:', error.message);
-              const fallbackData = {
+              console.error('❌ فشل الاتصال:', error.message);
+              fs.writeFileSync('./data/matches.json', JSON.stringify({
                 response: [{
-                  fixture: { id: 9999, date: today, status: { short: 'NS', long: 'Not Started' } },
-                  teams: { home: { name: 'فريق افتراضي ١' }, away: { name: 'فريق افتراضي ٢' } },
-                  league: { name: 'بطولة افتراضية' }
+                  fixture: { 
+                    id: Date.now(),
+                    date: today,
+                    status: { short: 'FT', long: 'Fallback Data' }
+                  },
+                  teams: { 
+                    home: { name: 'فريق 1' }, 
+                    away: { name: 'فريق 2' } 
+                  },
+                  league: { name: 'بدون اتصال بالإنترنت' },
+                  goals: { home: 0, away: 0 }
                 }]
-              };
-              fs.writeFileSync('./data/matches.json', JSON.stringify(fallbackData, null, 2));
-              console.log('⚠️ تم استخدام بيانات احتياطية');
+              }, null, 2));
+              console.log('⚠️ تم استخدام بيانات محلية');
             }
           }
-          fetchMatches();
+          getMatches();
           "
 
-      - name: Commit and Push Changes
+      - name: Commit Changes
+        if: success()
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Bot"
+          git config --global user.email "actions@users.noreply.github.com"
           git add data/matches.json
-          git diff --quiet || (git commit -m "تحديث تلقائي لبيانات المباريات [skip ci]" && git push)
+          git diff --quiet || git commit -m "تحديث بيانات المباريات [auto]"
+          
+      - name: Push Changes
+        if: success()
+        run: git push
