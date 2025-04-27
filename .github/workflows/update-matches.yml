@@ -15,24 +15,22 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Set up Node.js
+      - name: Set up Node.js (without cache)
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'  # تم التعليق أو إزالة هذا السطر إذا لم يكن هناك package-lock.json
+          cache: false  # تعطيل التخزين المؤقت لتجنب مشكلة lock file
 
-      - name: Create Data Directory
+      - name: Initialize Node.js project
         run: |
           mkdir -p data
-          touch data/matches.json
+          echo '{"name":"foot-tv-updater","version":"1.0.0","private":true}' > package.json
 
-      - name: Install Axios Directly
-        run: npm install axios --no-package-lock  # حل المشكلة بعدم إنشاء ملف lock
+      - name: Install Axios directly
+        run: npm install axios --no-package-lock --no-save  # تثبيت بدون إنشاء lock file
 
-      - name: Fetch Latest Matches
+      - name: Fetch and Update Matches Data
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: |
@@ -43,61 +41,35 @@ jobs:
           
           async function fetchMatches() {
             try {
-              const response = await axios.get(
-                'https://api-football-v1.p.rapidapi.com/v3/fixtures',
-                {
-                  params: { date: today },
-                  headers: {
-                    'x-rapidapi-host': 'api-football-v1.p.rapidapi.com',
-                    'x-rapidapi-key': process.env.RAPIDAPI_KEY
-                  }
+              const response = await axios.get('https://api-football-v1.p.rapidapi.com/v3/fixtures', {
+                params: { date: today },
+                headers: {
+                  'x-rapidapi-host': 'api-football-v1.p.rapidapi.com',
+                  'x-rapidapi-key': process.env.RAPIDAPI_KEY
                 }
-              );
+              });
               
-              fs.writeFileSync(
-                './data/matches.json',
-                JSON.stringify(response.data, null, 2)
-              );
-              console.log('Data fetched successfully!');
-              
+              fs.writeFileSync('./data/matches.json', JSON.stringify(response.data, null, 2));
+              console.log('✅ تم تحديث البيانات بنجاح');
             } catch (error) {
-              console.error('API Error:', error.message);
-              // Generate fallback data
+              console.error('❌ خطأ في جلب البيانات:', error.message);
               const fallbackData = {
-                response: [
-                  {
-                    fixture: {
-                      id: Math.floor(Math.random() * 10000),
-                      date: today,
-                      status: { short: 'NS', long: 'Not Started' }
-                    },
-                    teams: {
-                      home: { name: 'Fallback Team A' },
-                      away: { name: 'Fallback Team B' }
-                    },
-                    league: { name: 'Fallback League' }
-                  }
-                ]
+                response: [{
+                  fixture: { id: 9999, date: today, status: { short: 'NS', long: 'Not Started' } },
+                  teams: { home: { name: 'فريق افتراضي ١' }, away: { name: 'فريق افتراضي ٢' } },
+                  league: { name: 'بطولة افتراضية' }
+                }]
               };
-              
-              fs.writeFileSync(
-                './data/matches.json',
-                JSON.stringify(fallbackData, null, 2)
-              );
-              console.log('Generated fallback data');
+              fs.writeFileSync('./data/matches.json', JSON.stringify(fallbackData, null, 2));
+              console.log('⚠️ تم استخدام بيانات احتياطية');
             }
           }
-          
           fetchMatches();
           "
 
-      - name: Configure Git
+      - name: Commit and Push Changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-
-      - name: Commit & Push Changes
-        run: |
           git add data/matches.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update matches data [skip ci]" && git push)
+          git diff --quiet || (git commit -m "تحديث تلقائي لبيانات المباريات [skip ci]" && git push)
