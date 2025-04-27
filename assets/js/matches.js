@@ -82,36 +82,63 @@ renderMatchesByDate: function(matches, type) {
   container.innerHTML = matches.map(match => this.getMatchHTML(match)).join('');
 }
 
-  function getMatchHTML: function(match) {
+ getMatchHTML: function(match) {
+    // معالجة الصور التالفة
+    const leagueLogo = match.league.logo || 'assets/images/default-league.png';
+    const homeLogo = match.teams.home.logo || 'assets/images/default-team.png';
+    const awayLogo = match.teams.away.logo || 'assets/images/default-team.png';
+    const venueName = match.fixture.venue?.name || 'ملعب غير معروف';
+
+    // تنسيق الوقت
+    const matchTime = new Date(match.fixture.date).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true
+    });
+
+    // حالة المباراة
+    const statusClass = match.fixture.status.short.toLowerCase();
+    let score = '-';
+    if (match.goals.home !== null && match.goals.away !== null) {
+      score = `${match.goals.home} - ${match.goals.away}`;
+    }
+
     return `
-      <div class="match-card ${match.fixture.status.short.toLowerCase()}">
+      <div class="match-card ${statusClass}">
         <div class="match-header">
           <span class="league">
-            <img src="${match.league.logo}" alt="${match.league.name}">
+            <img src="${leagueLogo}" 
+                 alt="${match.league.name}"
+                 onerror="this.src='assets/images/default-league.png'">
             ${match.league.name}
           </span>
           <span class="status">${match.fixture.status.long}</span>
         </div>
         <div class="teams">
           <div class="team home-team">
-            <img src="${match.teams.home.logo}" alt="${match.teams.home.name}">
+            <img src="${homeLogo}" 
+                 alt="${match.teams.home.name}"
+                 onerror="this.src='assets/images/default-team.png'">
             <span>${match.teams.home.name}</span>
           </div>
           <div class="score">
-            ${match.goals.home ?? '-'} - ${match.goals.away ?? '-'}
+            ${score}
           </div>
           <div class="team away-team">
-            <img src="${match.teams.away.logo}" alt="${match.teams.away.name}">
+            <img src="${awayLogo}" 
+                 alt="${match.teams.away.name}"
+                 onerror="this.src='assets/images/default-team.png'">
             <span>${match.teams.away.name}</span>
           </div>
         </div>
         <div class="match-footer">
           <span class="time">
-            ${new Date(match.fixture.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <i class="far fa-clock"></i>
+            ${matchTime}
           </span>
           <span class="venue">
             <i class="fas fa-map-marker-alt"></i>
-            ${match.fixture.venue?.name || 'Unknown venue'}
+            ${venueName}
           </span>
         </div>
       </div>
