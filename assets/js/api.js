@@ -76,4 +76,4 @@ const FootballAPI = {
     }
 };
 
-export default FootballAPI;
+export default RAPIDAPI_KEY;
