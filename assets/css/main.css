@@ -128,3 +128,13 @@ body {
         display: block;
     }
 }
+renderMatchesByDate(matches) {
+  const matchesContainer = document.getElementById('matches-container');
+  // Verify the DOM element was found, otherwise do nothing
+  if (!matchesContainer) {
+    console.error("Error: Could not find 'matches-container' in the DOM.");
+    return;
+  }
+  matchesContainer.innerHTML = '';
+  //... rest of the code
+}
