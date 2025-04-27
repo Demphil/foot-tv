@@ -82,7 +82,7 @@ renderMatchesByDate: function(matches, type) {
   container.innerHTML = matches.map(match => this.getMatchHTML(match)).join('');
 }
 
-  getMatchHTML: function(match) {
+  function getMatchHTML: function(match) {
     return `
       <div class="match-card ${match.fixture.status.short.toLowerCase()}">
         <div class="match-header">
