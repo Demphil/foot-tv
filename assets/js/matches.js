@@ -1,4 +1,4 @@
-import { FootballAPI } from './api.js';
+import { FootballAPI } from '.assets/js/api.jss';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // عناصر DOM
