@@ -48,23 +48,26 @@
                 <div class="league-filter">
                     <select id="league-select">
                         <option value="all">كل البطولات</option>
-                        <!-- سيتم ملؤها بواسطة JavaScript -->
+                        <option value="PL">الدوري الإنجليزي</option>
+                        <option value="PD">الدوري الإسباني</option>
+                        <option value="SA">الدوري الإيطالي</option>
+                        <option value="BL1">الدوري الألماني</option>
+                        <option value="FL1">الدوري الفرنسي</option>
+                        <option value="SAU">الدوري السعودي</option>
+                        <option value="MAR1">الدوري المغربي</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Matches Containers -->
-            <div id="today-matches" class="matches-container">
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل مباريات اليوم...
-                </div>
+            <!-- Loading Indicator -->
+            <div id="loading-indicator" class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i> جاري تحميل البيانات...
             </div>
 
-            <div id="tomorrow-matches" class="matches-container">
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل مباريات الغد...
-                </div>
-            </div>
+            <!-- Matches Containers -->
+            <div id="today-matches" class="matches-container"></div>
+            <div id="tomorrow-matches" class="matches-container" style="display:none;"></div>
+            <div id="week-matches" class="matches-container" style="display:none;"></div>
 
             <!-- Error Container -->
             <div id="error-container" class="error-container" style="display: none;"></div>
@@ -79,34 +82,85 @@
     </footer>
 
     <!-- Scripts -->
- <script type="module">
-  // Configuration
-  window.ENV = {
-    RAPIDAPI_KEY: '8d831470f41e4dbe983fba512cc0c795'
-  };
+    <script type="module">
+        // Configuration
+        window.ENV = {
+            FOOTBALL_DATA_KEY: '8d831470f41e4dbe983fba512cc0c795' // استبدلها بمفتاحك الفعلي
+        };
 
-  // Imports
-  import { FootballAPI } from './assets/js/api.js';
-  import { MatchRenderer } from './assets/js/matches.js';
+        // Imports
+        import { FootballAPI } from './assets/js/api.js';
+        import { MatchRenderer } from './assets/js/matches.js';
 
-  // Update copyright year
-  document.getElementById('current-year').textContent = new Date().getFullYear();
+        // Update copyright year
+        document.getElementById('current-year').textContent = new Date().getFullYear();
 
-  // Initialize app
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      await MatchRenderer.init();
-      
-      // Test API (dev only)
-     // يمكنك استبدال كود الاختبار بهذا إذا أردت:
-if (process.env.NODE_ENV === 'development') {
-  FootballAPI.getMatchesByDate('2025-04-28')
-    .then(/* ... */);
-}
-    } catch (error) {
-      console.error('Initialization error:', error);
-    }
-  });
-</script>
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await MatchRenderer.init();
+                
+                // Setup filter buttons
+                document.getElementById('today-btn').addEventListener('click', () => {
+                    document.querySelectorAll('.matches-container').forEach(container => {
+                        container.style.display = 'none';
+                    });
+                    document.getElementById('today-matches').style.display = 'block';
+                    document.querySelectorAll('.date-filter button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+
+                document.getElementById('tomorrow-btn').addEventListener('click', function() {
+                    document.querySelectorAll('.matches-container').forEach(container => {
+                        container.style.display = 'none';
+                    });
+                    document.getElementById('tomorrow-matches').style.display = 'block';
+                    document.querySelectorAll('.date-filter button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+
+                document.getElementById('week-btn').addEventListener('click', async function() {
+                    document.querySelectorAll('.matches-container').forEach(container => {
+                        container.style.display = 'none';
+                    });
+                    document.getElementById('week-matches').style.display = 'block';
+                    document.querySelectorAll('.date-filter button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Load week matches
+                    try {
+                        const today = new Date();
+                        const weekMatches = [];
+                        
+                        for (let i = 0; i < 7; i++) {
+                            const date = new Date(today);
+                            date.setDate(today.getDate() + i);
+                            const formattedDate = MatchRenderer.formatDate(date);
+                            const matches = await MatchRenderer.getFilteredMatches(formattedDate);
+                            weekMatches.push(...matches);
+                        }
+                        
+                        document.getElementById('week-matches').innerHTML = 
+                            weekMatches.map(match => MatchRenderer.getMatchHTML(match)).join('') || 
+                            MatchRenderer.getNoMatchesHTML();
+                    } catch (error) {
+                        console.error('Error loading week matches:', error);
+                        document.getElementById('week-matches').innerHTML = 
+                            MatchRenderer.getNoMatchesHTML();
+                    }
+                });
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                MatchRenderer.showError(error);
+            }
+        });
+    </script>
 </body>
 </html>
