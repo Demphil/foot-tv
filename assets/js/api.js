@@ -58,7 +58,7 @@ async function fetchWithCache(endpoint, params = {}) {
     // إرسال الطلب إلى API
     const response = await fetch(url, {
       headers: {
-        'X-Auth-Token': API_KEY,
+        'X-Auth-Token':'8d831470f41e4dbe983fba512cc0c795',
         'Content-Type': 'application/json'
       }
     });
