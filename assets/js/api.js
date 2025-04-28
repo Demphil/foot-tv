@@ -3,23 +3,23 @@
 // دالة مساعدة لجلب المفتاح من مصادر مختلفة
 const getApiKey = () => {
   // 1. جلب المفتاح من متغيرات بيئة Vite (للتطوير المحلي)
-  if (import.meta.env?.VITE_FOOTBALL_DATA_API_KEY) {
-    return import.meta.env.VITE_FOOTBALL_DATA_API_KEY;
+  if (import.meta.env?.VITE_FOOTBALL_DATA_KEY) {
+    return import.meta.env.VITE_FOOTBALL_DATA_KEY;
   }
 
   // 2. جلب المفتاح من window.ENV (للإنتاج مثل GitHub Pages)
-  if (window.ENV?.FOOTBALL_DATA_API_KEY) {
-    return window.ENV.FOOTBALL_DATA_API_KEY;
+  if (window.ENV?.FOOTBALL_DATA_KEY) {
+    return window.ENV.FOOTBALL_DATA_KEY;
   }
 
   // 3. جلب المفتاح من localStorage
-  if (localStorage.getItem('FOOTBALL_DATA_API_KEY')) {
-    return localStorage.getItem('FOOTBALL_DATA_API_KEY');
+  if (localStorage.getItem('FOOTBALL_DATA_KEY')) {
+    return localStorage.getItem('FOOTBALL_DATA_KEY');
   }
 
   // 4. استخدام مفتاح افتراضي (للتطوير فقط)
   console.warn('Using default API key - for development only');
-  return 'YOUR_DEFAULT_API_KEY_HERE';
+  return 'FOOTBALL_DATA_KEY_HERE';
 };
 
 const API_KEY = getApiKey();
