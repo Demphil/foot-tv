@@ -142,17 +142,18 @@
 
     <!-- Scripts -->
     <script type="module">
-        // Configuration
-        window.ENV = {
-            FOOTBALL_DATA_KEY: '8d831470f41e4dbe983fba512cc0c795' // استبدلها بمفتاحك الفعلي
-        };
+  // تهيئة البيئة
+  window.ENV = {
+    RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'
+  };
 
-        // Imports
-        import { FootballAPI } from './assets/js/api.js';
-        import { MatchRenderer } from './assets/js/matches.js';
+  // استيراد الوحدات
+  import { FootballAPI } from './assets/js/api.js';
+  import { MatchRenderer } from './assets/js/matches.js';
 
-        // Update copyright year
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+  // تحديث سنة حقوق النشر
+  document.getElementById('current-year').textContent = new Date().getFullYear();
+
 
         // Initialize featured matches
         async function loadFeaturedMatches() {
