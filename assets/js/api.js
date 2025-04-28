@@ -107,3 +107,4 @@ export const FootballAPI = {
     IMPORTANT_LEAGUES.delete(leagueCode);
   }
 };
+export { FootballAPI };
