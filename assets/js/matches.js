@@ -247,18 +247,23 @@ const MatchRenderer = {
     },
 
     showError: function(error) {
-        if (this.elements.errorContainer) {
-            this.elements.errorContainer.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>${error.message || 'حدث خطأ في تحميل البيانات'}</p>
-                    <button class="retry-btn">إعادة المحاولة</button>
-                </div>
-            `;
-            this.elements.errorContainer.querySelector('.retry-btn')
-                .addEventListener('click', () => this.loadMatches());
-        }
-    },
+    const errorMsg = error.message.includes('FootballAPI') ? 
+        'حدث خطأ في تحميل بيانات المباريات. يرجى تحديث الصفحة.' : 
+        error.message;
+    
+    if (this.elements.errorContainer) {
+        this.elements.errorContainer.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>${errorMsg}</p>
+                <button class="retry-btn">إعادة المحاولة</button>
+            </div>
+        `;
+        this.elements.errorContainer.style.display = 'block';
+        this.elements.errorContainer.querySelector('.retry-btn')
+            .addEventListener('click', () => this.loadMatches());
+    }
+},
 
     formatDate: function(date) {
         return date.toISOString().split('T')[0];
