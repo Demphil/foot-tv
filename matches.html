@@ -80,27 +80,28 @@
 
     <!-- Scripts -->
     <script type="module">
-        // تهيئة البيئة
-        window.ENV = {
-            RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'
-        };
+  // تهيئة البيئة
+  window.ENV = {
+    RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'
+  };
 
-        // استيراد FootballAPI
-        import { FootballAPI } from './assets/js/api.js';
-        import { MatchRenderer } from './assets/js/matches.js';
+  // استيراد الوحدات
+  import { FootballAPI } from './assets/js/api.js';
+  import { MatchRenderer } from './assets/js/matches.js';
 
-        // تحديث سنة حقوق النشر
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+  // تحديث سنة حقوق النشر
+  document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // تهيئة التطبيق
-        document.addEventListener('DOMContentLoaded', () => {
-            MatchRenderer.init();
-            
-            // للاختبار (يمكن حذفها لاحقاً)
-            FootballAPI.getMatchesByDate('2023-07-20')
-                .then(data => console.log('Test API call:', data))
-                .catch(error => console.error('Test API error:', error));
-        });
-    </script>
+  // تهيئة التطبيق
+  document.addEventListener('DOMContentLoaded', () => {
+    MatchRenderer.init();
+    
+    // للاختبار (يمكن حذفها لاحقاً)
+    if (process.env.NODE_ENV === 'development') {
+  FootballAPI.getMatchesByDate('2025-04-30')
+    .then(/* ... */);
+}
+  });
+</script>
 </body>
 </html>
