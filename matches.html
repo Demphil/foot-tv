@@ -96,11 +96,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     MatchRenderer.init();
     
-    // للاختبار (يمكن حذفها لاحقاً)
-    if (process.env.NODE_ENV === 'development') {
-  FootballAPI.getMatchesByDate('2025-04-30')
-    .then(/* ... */);
-}
+  
   });
 </script>
 </body>
