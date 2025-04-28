@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/home.css">
     <link rel="icon" href="assets/images/favicon.ico">
 </head>
 <body>
@@ -36,17 +37,72 @@
     <section class="hero">
         <div class="container">
             <h1>أهلاً بك في موقع متابعة مباريات كرة القدم</h1>
-            <p>تابع أحدث المباريات والنتائج والإحصائيات</p>
-            <a href="matches.html" class="btn">عرض المباريات</a>
+            <p>تابع أحدث المباريات والنتائج والإحصائيات للدوريات الأوروبية والعربية</p>
+            <div class="hero-buttons">
+                <a href="matches.html" class="btn btn-primary"><i class="fas fa-futbol"></i> عرض المباريات</a>
+                <a href="news.html" class="btn btn-secondary"><i class="fas fa-newspaper"></i> آخر الأخبار</a>
+            </div>
         </div>
     </section>
 
     <!-- Featured Matches -->
     <section class="featured-matches">
         <div class="container">
-            <h2><i class="fas fa-star"></i> مباريات مميزة</h2>
+            <h2><i class="fas fa-star"></i> المباريات القادمة</h2>
             <div id="featured-matches-container" class="matches-grid">
                 <!-- سيتم ملؤها بواسطة JavaScript -->
+                <div class="loading-matches">
+                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل المباريات...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Leagues -->
+    <section class="top-leagues">
+        <div class="container">
+            <h2><i class="fas fa-trophy"></i> أشهر البطولات</h2>
+            <div class="leagues-grid">
+                <a href="matches.html?league=PL" class="league-card">
+                    <img src="assets/images/leagues/premier-league.png" alt="الدوري الإنجليزي">
+                    <span>الدوري الإنجليزي</span>
+                </a>
+                <a href="matches.html?league=PD" class="league-card">
+                    <img src="assets/images/leagues/laliga.png" alt="الدوري الإسباني">
+                    <span>الدوري الإسباني</span>
+                </a>
+                <a href="matches.html?league=SA" class="league-card">
+                    <img src="assets/images/leagues/serie-a.png" alt="الدوري الإيطالي">
+                    <span>الدوري الإيطالي</span>
+                </a>
+                <a href="matches.html?league=SAU" class="league-card">
+                    <img src="assets/images/leagues/saudi-league.png" alt="الدوري السعودي">
+                    <span>الدوري السعودي</span>
+                </a>
+                <a href="matches.html?league=MAR1" class="league-card">
+                    <img src="assets/images/leagues/moroccan-league.png" alt="الدوري المغربي">
+                    <span>الدوري المغربي</span>
+                </a>
+                <a href="matches.html?league=CL" class="league-card">
+                    <img src="assets-images/leagues/champions-league.png" alt="دوري أبطال أوروبا">
+                    <span>دوري الأبطال</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest News -->
+    <section class="latest-news">
+        <div class="container">
+            <h2><i class="fas fa-newspaper"></i> آخر الأخبار</h2>
+            <div id="news-container" class="news-grid">
+                <!-- سيتم ملؤها بواسطة JavaScript -->
+                <div class="loading-news">
+                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل الأخبار...
+                </div>
+            </div>
+            <div class="view-all">
+                <a href="news.html" class="btn btn-outline">عرض جميع الأخبار</a>
             </div>
         </div>
     </section>
@@ -54,40 +110,119 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 موقع مباريات كرة القدم. جميع الحقوق محفوظة.</p>
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="assets/images/logo-white.png" alt="شعار الموقع">
+                    <p>موقع متخصص في متابعة مباريات كرة القدم العربية والعالمية</p>
+                </div>
+                <div class="footer-links">
+                    <h3>روابط سريعة</h3>
+                    <ul>
+                        <li><a href="index.html">الرئيسية</a></li>
+                        <li><a href="matches.html">المباريات</a></li>
+                        <li><a href="news.html">الأخبار</a></li>
+                        <li><a href="about.html">عن الموقع</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h3>تابعنا</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; <span id="current-year"></span> موقع مباريات كرة القدم. جميع الحقوق محفوظة.</p>
+            </div>
         </div>
     </footer>
 
-     <script type="module" src="assets/js/api.js"></script>
-<!-- للاستخدام مع GitHub Pages -->
- <script type="module">
-  // Configuration
-  window.ENV = {
-    RAPIDAPI_KEY: '8d831470f41e4dbe983fba512cc0c795'
-  };
+    <!-- Scripts -->
+    <script type="module">
+        // Configuration
+        window.ENV = {
+            FOOTBALL_DATA_KEY: '8d831470f41e4dbe983fba512cc0c795' // استبدلها بمفتاحك الفعلي
+        };
 
-  // Imports
-  import { FootballAPI } from './assets/js/api.js';
-  import { MatchRenderer } from './assets/js/matches.js';
+        // Imports
+        import { FootballAPI } from './assets/js/api.js';
+        import { MatchRenderer } from './assets/js/matches.js';
 
-  // Update copyright year
-  document.getElementById('current-year').textContent = new Date().getFullYear();
+        // Update copyright year
+        document.getElementById('current-year').textContent = new Date().getFullYear();
 
-  // Initialize app
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      await MatchRenderer.init();
-      
-      // Test API (dev only)
-     // يمكنك استبدال كود الاختبار بهذا إذا أردت:
-if (process.env.NODE_ENV === 'development') {
-  FootballAPI.getMatchesByDate('2025-04-30')
-    .then(/* ... */);
-}
-    } catch (error) {
-      console.error('Initialization error:', error);
-    }
-  });
-</script>
+        // Initialize featured matches
+        async function loadFeaturedMatches() {
+            try {
+                const today = new Date();
+                const response = await FootballAPI.getMatchesByDate(MatchRenderer.formatDate(today));
+                
+                const featuredContainer = document.getElementById('featured-matches-container');
+                if (response.matches && response.matches.length > 0) {
+                    const featuredMatches = response.matches
+                        .filter(match => MatchRenderer.IMPORTANT_LEAGUES.has(match.competition.code))
+                        .slice(0, 4); // عرض 4 مباريات فقط
+                    
+                    featuredContainer.innerHTML = featuredMatches.map(match => `
+                        <div class="match-card">
+                            <div class="match-header">
+                                <span class="league">
+                                    <img src="${match.competition.emblem || 'assets/images/default-league.png'}" 
+                                        alt="${match.competition.name}">
+                                    ${match.competition.name}
+                                </span>
+                            </div>
+                            <div class="teams">
+                                <div class="team home-team">
+                                    <img src="${match.homeTeam.crest || 'assets/images/default-team.png'}" 
+                                        alt="${match.homeTeam.shortName || match.homeTeam.name}">
+                                    <span>${match.homeTeam.shortName || match.homeTeam.name}</span>
+                                </div>
+                                <div class="vs">vs</div>
+                                <div class="team away-team">
+                                    <img src="${match.awayTeam.crest || 'assets/images/default-team.png'}" 
+                                        alt="${match.awayTeam.shortName || match.awayTeam.name}">
+                                    <span>${match.awayTeam.shortName || match.awayTeam.name}</span>
+                                </div>
+                            </div>
+                            <div class="match-time">
+                                <i class="far fa-clock"></i>
+                                ${new Date(match.utcDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                            <a href="matches.html?date=${MatchRenderer.formatDate(new Date(match.utcDate))}" class="match-link">تفاصيل المباراة</a>
+                        </div>
+                    `).join('') || MatchRenderer.getNoMatchesHTML();
+                } else {
+                    featuredContainer.innerHTML = MatchRenderer.getNoMatchesHTML();
+                }
+            } catch (error) {
+                console.error('Error loading featured matches:', error);
+                document.getElementById('featured-matches-container').innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>حدث خطأ في تحميل المباريات</p>
+                        <button class="retry-btn" onclick="loadFeaturedMatches()">إعادة المحاولة</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await loadFeaturedMatches();
+                
+                // Mobile menu toggle
+                document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
+                    document.querySelector('.main-nav').classList.toggle('active');
+                });
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        });
+    </script>
 </body>
 </html>
