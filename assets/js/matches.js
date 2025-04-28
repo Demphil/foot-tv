@@ -82,17 +82,28 @@ const MatchRenderer = {
         }
     },
 
-    getFilteredMatches: async function(date) {
-        try {
-            const response = await FootballAPI.getMatchesByDate(date);
-            return response.matches?.filter(match => 
-                this.IMPORTANT_LEAGUES.has(match.competition?.code)
-            ) || [];
-        } catch (error) {
-            console.error('Error fetching matches:', error);
-            return this.getFallbackMatches();
+  getFilteredMatches: async function(date) {
+    try {
+        if (!window.FootballAPI && !FootballAPI) {
+            throw new Error('FootballAPI غير معروف - تأكد من استيراده بشكل صحيح');
         }
-    },
+        
+        const api = window.FootballAPI || FootballAPI;
+        const response = await api.getMatchesByDate(date);
+        
+        if (!response || !response.matches) {
+            throw new Error('استجابة API غير صالحة');
+        }
+        
+        return response.matches.filter(match => 
+            this.IMPORTANT_LEAGUES.has(match.competition?.code)
+        ) || [];
+        
+    } catch (error) {
+        console.error('Error fetching matches:', error);
+        return this.getFallbackMatches();
+    }
+},
 
     getFallbackMatches: function() {
         return [
