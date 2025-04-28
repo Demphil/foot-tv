@@ -1,5 +1,6 @@
 import { FootballAPI } from './api.js';
 
+// تعريف الكائن
 const MatchRenderer = {
     elements: {
         todayContainer: null,
@@ -90,20 +91,17 @@ const MatchRenderer = {
     },
 
     getMatchHTML: function(match) {
-        // معالجة الصور التالفة
         const leagueLogo = match.league.logo || 'assets/images/default-league.png';
         const homeLogo = match.teams.home.logo || 'assets/images/default-team.png';
         const awayLogo = match.teams.away.logo || 'assets/images/default-team.png';
         const venueName = match.fixture.venue?.name || 'ملعب غير معروف';
 
-        // تنسيق الوقت
         const matchTime = new Date(match.fixture.date).toLocaleTimeString([], { 
             hour: '2-digit', 
             minute: '2-digit',
             hour12: true 
         });
 
-        // حالة المباراة
         const statusClass = match.fixture.status.short.toLowerCase();
         let score = '-';
         if (match.goals.home !== null && match.goals.away !== null) {
@@ -192,7 +190,10 @@ const MatchRenderer = {
     }
 };
 
-// التهيئة عند تحميل الصفحة
+// التصدير الأساسي
+export { MatchRenderer };
+
+// التهيئة عند تحميل الصفحة (اختياري)
 document.addEventListener('DOMContentLoaded', () => {
     MatchRenderer.init();
 });
