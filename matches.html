@@ -87,14 +87,17 @@
 
         // استيراد FootballAPI
         import { FootballAPI } from './assets/js/api.js';
-        import { MatchRenderer } from './assets/js/matches.js';
+        import { MatchRenderer } from './assets/js/matches.js'; // للتصدير المسمى
+  // import MatchRenderer from './assets/js/matches.js'; // للتصدير الافتراضي
+  
 
         // تحديث سنة حقوق النشر
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
         // تهيئة التطبيق
-        document.addEventListener('DOMContentLoaded', () => {
-            MatchRenderer.init();
+         document.addEventListener('DOMContentLoaded', () => {
+    MatchRenderer.init();
+  });
             
             // للاختبار (يمكن حذفها لاحقاً)
             FootballAPI.getMatchesByDate('2025-04-28')
