@@ -1,5 +1,4 @@
-// assets/js/matches.js
-
+import { FootballAPI } from './api.js';
 const MatchRenderer = {
     elements: {
         todayContainer: null,
