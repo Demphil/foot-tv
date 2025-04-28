@@ -48,26 +48,32 @@
                 <div class="league-filter">
                     <select id="league-select">
                         <option value="all">كل البطولات</option>
-                        <option value="PL">الدوري الإنجليزي</option>
-                        <option value="PD">الدوري الإسباني</option>
-                        <option value="SA">الدوري الإيطالي</option>
-                        <option value="BL1">الدوري الألماني</option>
-                        <option value="FL1">الدوري الفرنسي</option>
-                        <option value="SAU">الدوري السعودي</option>
-                        <option value="MAR1">الدوري المغربي</option>
+                        <!-- سيتم ملؤها بواسطة JavaScript -->
                     </select>
                 </div>
             </div>
 
-            <!-- Loading Indicator -->
-            <div id="loading-indicator" class="loading-indicator">
-                <i class="fas fa-spinner fa-spin"></i> جاري تحميل البيانات...
-            </div>
+            <!-- Today Matches Section -->
+            <section id="today-section" class="matches-section">
+                <h2><i class="far fa-calendar-alt"></i> مباريات اليوم</h2>
+                <span class="date-display" id="today-date"></span>
+                <div id="today-matches" class="matches-container">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> جاري تحميل مباريات اليوم...
+                    </div>
+                </div>
+            </section>
 
-            <!-- Matches Containers -->
-            <div id="today-matches" class="matches-container"></div>
-            <div id="tomorrow-matches" class="matches-container" style="display:none;"></div>
-            <div id="week-matches" class="matches-container" style="display:none;"></div>
+            <!-- Tomorrow Matches Section -->
+            <section id="tomorrow-section" class="matches-section">
+                <h2><i class="far fa-calendar-check"></i> مباريات الغد</h2>
+                <span class="date-display" id="tomorrow-date"></span>
+                <div id="tomorrow-matches" class="matches-container">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> جاري تحميل مباريات الغد...
+                    </div>
+                </div>
+            </section>
 
             <!-- Error Container -->
             <div id="error-container" class="error-container" style="display: none;"></div>
@@ -83,84 +89,17 @@
 
     <!-- Scripts -->
     <script type="module">
-        // Configuration
+        // تهيئة البيئة للاستخدام مع GitHub Pages
         window.ENV = {
-            FOOTBALL_DATA_KEY: '8d831470f41e4dbe983fba512cc0c795' // استبدلها بمفتاحك الفعلي
+            RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'
         };
 
-        // Imports
-        import { FootballAPI } from './assets/js/api.js';
-        import { MatchRenderer } from './assets/js/matches.js';
-
-        // Update copyright year
+        // تحديث سنة حقوق النشر
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                await MatchRenderer.init();
-                
-                // Setup filter buttons
-                document.getElementById('today-btn').addEventListener('click', () => {
-                    document.querySelectorAll('.matches-container').forEach(container => {
-                        container.style.display = 'none';
-                    });
-                    document.getElementById('today-matches').style.display = 'block';
-                    document.querySelectorAll('.date-filter button').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                });
-
-                document.getElementById('tomorrow-btn').addEventListener('click', function() {
-                    document.querySelectorAll('.matches-container').forEach(container => {
-                        container.style.display = 'none';
-                    });
-                    document.getElementById('tomorrow-matches').style.display = 'block';
-                    document.querySelectorAll('.date-filter button').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                });
-
-                document.getElementById('week-btn').addEventListener('click', async function() {
-                    document.querySelectorAll('.matches-container').forEach(container => {
-                        container.style.display = 'none';
-                    });
-                    document.getElementById('week-matches').style.display = 'block';
-                    document.querySelectorAll('.date-filter button').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    
-                    // Load week matches
-                    try {
-                        const today = new Date();
-                        const weekMatches = [];
-                        
-                        for (let i = 0; i < 7; i++) {
-                            const date = new Date(today);
-                            date.setDate(today.getDate() + i);
-                            const formattedDate = MatchRenderer.formatDate(date);
-                            const matches = await MatchRenderer.getFilteredMatches(formattedDate);
-                            weekMatches.push(...matches);
-                        }
-                        
-                        document.getElementById('week-matches').innerHTML = 
-                            weekMatches.map(match => MatchRenderer.getMatchHTML(match)).join('') || 
-                            MatchRenderer.getNoMatchesHTML();
-                    } catch (error) {
-                        console.error('Error loading week matches:', error);
-                        document.getElementById('week-matches').innerHTML = 
-                            MatchRenderer.getNoMatchesHTML();
-                    }
-                });
-
-            } catch (error) {
-                console.error('Initialization error:', error);
-                MatchRenderer.showError(error);
-            }
-        });
+        // استيراد الملفات
+        import FootballAPI from './assets/js/api.js';
+        import './assets/js/matches.js';
     </script>
 </body>
 </html>
