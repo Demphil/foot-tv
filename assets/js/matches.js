@@ -1,8 +1,18 @@
-// التعديلات في بداية الكائن
+// assets/js/matches.js
+
 const MatchRenderer = {
-    // تغيير معرّفات الدوريات لاستخدام رموز football-data.org
+    elements: {
+        todayContainer: null,
+        tomorrowContainer: null,
+        loadingIndicator: null,
+        errorContainer: null,
+        dateFilter: null,
+        leagueFilter: null
+    },
+
+    // معرّفات الدوريات المهمة (رموز football-data.org)
     IMPORTANT_LEAGUES: new Set([
-        'PL',    // الدوري الإنجليزي
+        'PL',    // الدوري الإنجليزي الممتاز
         'PD',    // الدوري الإسباني
         'SA',    // الدوري الإيطالي
         'BL1',   // الدوري الألماني
@@ -12,7 +22,67 @@ const MatchRenderer = {
         'MAR1'   // الدوري المغربي (يجب التأكد من الرمز)
     ]),
 
-    // تعديل دالة getFilteredMatches
+    init: async function() {
+        this.cacheElements();
+        await this.loadMatches();
+        this.setupEventListeners();
+    },
+
+    cacheElements: function() {
+        this.elements = {
+            todayContainer: document.getElementById('today-matches'),
+            tomorrowContainer: document.getElementById('tomorrow-matches'),
+            loadingIndicator: document.getElementById('loading-indicator'),
+            errorContainer: document.getElementById('error-container'),
+            dateFilter: document.getElementById('date-filter'),
+            leagueFilter: document.getElementById('league-filter')
+        };
+    },
+
+    setupEventListeners: function() {
+        if (this.elements.dateFilter) {
+            this.elements.dateFilter.addEventListener('change', (e) => this.handleDateFilter(e));
+        }
+        
+        if (this.elements.leagueFilter) {
+            this.elements.leagueFilter.addEventListener('change', (e) => this.handleLeagueFilter(e));
+        }
+    },
+
+    handleDateFilter: async function(e) {
+        const date = e.target.value;
+        await this.renderMatches(date);
+    },
+
+    handleLeagueFilter: async function(e) {
+        const leagueCode = e.target.value;
+        await this.renderMatches(null, leagueCode);
+    },
+
+    loadMatches: async function() {
+        try {
+            this.showLoading();
+            
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const [todayMatches, tomorrowMatches] = await Promise.all([
+                this.getFilteredMatches(this.formatDate(today)),
+                this.getFilteredMatches(this.formatDate(tomorrow))
+            ]);
+            
+            this.renderMatchesByDate(todayMatches, 'today');
+            this.renderMatchesByDate(tomorrowMatches, 'tomorrow');
+            
+        } catch (error) {
+            console.error('Failed to load matches:', error);
+            this.showError(error);
+        } finally {
+            this.hideLoading();
+        }
+    },
+
     getFilteredMatches: async function(date) {
         try {
             const response = await FootballAPI.getMatchesByDate(date);
@@ -25,7 +95,52 @@ const MatchRenderer = {
         }
     },
 
-    // تعديل دالة getMatchHTML لتعكس هيكل API الجديد
+    getFallbackMatches: function() {
+        return [
+            {
+                competition: { 
+                    code: 'SAU',
+                    name: "الدوري السعودي",
+                    emblem: "assets/images/default-league.png"
+                },
+                homeTeam: { 
+                    name: "الهلال",
+                    shortName: "الهلال",
+                    crest: "assets/images/default-team.png"
+                },
+                awayTeam: { 
+                    name: "النصر",
+                    shortName: "النصر",
+                    crest: "assets/images/default-team.png"
+                },
+                utcDate: new Date().toISOString(),
+                status: "FINISHED",
+                venue: "ملعب الملك فهد",
+                score: {
+                    fullTime: { home: 0, away: 0 }
+                }
+            }
+        ];
+    },
+
+    renderMatchesByDate: function(matches, type) {
+        const container = type === 'today' 
+            ? this.elements.todayContainer 
+            : this.elements.tomorrowContainer;
+        
+        if (!container) {
+            console.error(`Container not found for ${type}`);
+            return;
+        }
+        
+        if (!matches || matches.length === 0) {
+            container.innerHTML = this.getNoMatchesHTML();
+            return;
+        }
+        
+        container.innerHTML = matches.map(match => this.getMatchHTML(match)).join('');
+    },
+
     getMatchHTML: function(match) {
         const leagueLogo = match.competition.emblem || 'assets/images/default-league.png';
         const homeLogo = match.homeTeam.crest || 'assets/images/default-team.png';
@@ -38,7 +153,7 @@ const MatchRenderer = {
             hour12: true 
         });
 
-        const statusClass = match.status.toLowerCase();
+        const statusClass = match.status.toLowerCase().replace('_', '-');
         let score = '-';
         if (match.score?.fullTime?.home !== undefined && match.score?.fullTime?.away !== undefined) {
             score = `${match.score.fullTime.home} - ${match.score.fullTime.away}`;
@@ -86,7 +201,6 @@ const MatchRenderer = {
         `;
     },
 
-    // دالة مساعدة لتحويل حالة المباراة
     getStatusText: function(status) {
         const statusMap = {
             'SCHEDULED': 'مقررة',
@@ -101,32 +215,45 @@ const MatchRenderer = {
         return statusMap[status] || status;
     },
 
-    // تعديل البيانات الاحتياطية
-    getFallbackMatches: function() {
-        return [
-            {
-                competition: { 
-                    code: 'SAU',
-                    name: "الدوري السعودي",
-                    emblem: "assets/images/default-league.png"
-                },
-                homeTeam: { 
-                    name: "الهلال",
-                    shortName: "الهلال",
-                    crest: "assets/images/default-team.png"
-                },
-                awayTeam: { 
-                    name: "النصر",
-                    shortName: "النصر",
-                    crest: "assets/images/default-team.png"
-                },
-                utcDate: new Date().toISOString(),
-                status: "FINISHED",
-                venue: "ملعب الملك فهد",
-                score: {
-                    fullTime: { home: 0, away: 0 }
-                }
-            }
-        ];
+    getNoMatchesHTML: function() {
+        return `
+            <div class="no-matches">
+                <i class="far fa-futbol"></i>
+                <p>لا توجد مباريات</p>
+            </div>
+        `;
+    },
+
+    showLoading: function() {
+        if (this.elements.loadingIndicator) {
+            this.elements.loadingIndicator.style.display = 'block';
+        }
+    },
+
+    hideLoading: function() {
+        if (this.elements.loadingIndicator) {
+            this.elements.loadingIndicator.style.display = 'none';
+        }
+    },
+
+    showError: function(error) {
+        if (this.elements.errorContainer) {
+            this.elements.errorContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${error.message || 'حدث خطأ في تحميل البيانات'}</p>
+                    <button class="retry-btn">إعادة المحاولة</button>
+                </div>
+            `;
+            this.elements.errorContainer.querySelector('.retry-btn')
+                .addEventListener('click', () => this.loadMatches());
+        }
+    },
+
+    formatDate: function(date) {
+        return date.toISOString().split('T')[0];
     }
 };
+
+// التصدير الرئيسي
+export { MatchRenderer };
