@@ -1,9 +1,9 @@
-/* تنسيقات صفحة المباريات */
-.matches-main {
+/* تنسيقات عامة للمباريات */
+.matches-section {
     padding: 2rem 0;
 }
 
-.matches-main h1 {
+.matches-section h2 {
     text-align: center;
     margin-bottom: 2rem;
     color: var(--primary-color);
@@ -11,9 +11,11 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    font-size: 1.8rem;
 }
 
-.filters {
+/* تنسيقات الفلاتر (لصفحة matches.html فقط) */
+.matches-main .filters {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -22,37 +24,40 @@
     gap: 1rem;
 }
 
-.date-filter {
+.matches-main .date-filter {
     display: flex;
     gap: 10px;
 }
 
-.date-filter button {
+.matches-main .date-filter button {
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 5px;
     background-color: #e2e8f0;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-family: 'Tajawal', sans-serif;
 }
 
-.date-filter button.active {
+.matches-main .date-filter button.active {
     background-color: var(--primary-color);
     color: var(--light-text);
 }
 
-.date-filter button:hover {
+.matches-main .date-filter button:hover {
     background-color: #cbd5e1;
 }
 
-.league-filter select {
+.matches-main .league-filter select {
     padding: 0.5rem;
     border-radius: 5px;
     border: 1px solid #cbd5e1;
     background-color: var(--card-bg);
+    font-family: 'Tajawal', sans-serif;
 }
 
-.matches-container {
+/* تنسيقات بطاقات المباريات المشتركة */
+.matches-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
@@ -63,40 +68,55 @@
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
 }
 
 .match-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .match-card.live {
-    border-top: 4px solid var(--live-color);
+    border-left: 4px solid var(--live-color);
 }
 
 .match-card.upcoming {
-    border-top: 4px solid var(--upcoming-color);
+    border-left: 4px solid var(--upcoming-color);
 }
 
 .match-card.finished {
-    border-top: 4px solid var(--finished-color);
+    border-left: 4px solid var(--finished-color);
 }
 
 .match-header {
     display: flex;
     justify-content: space-between;
-    padding: 0.8rem;
+    align-items: center;
+    padding: 0.8rem 1rem;
     background-color: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
 }
 
 .match-header .league {
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.match-header .league img {
+    width: 20px;
+    height: 20px;
 }
 
 .match-header .status {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #64748b;
+    background-color: #e2e8f0;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
 }
 
 .teams {
@@ -104,6 +124,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 1rem;
+    position: relative;
 }
 
 .team {
@@ -112,64 +133,158 @@
     align-items: center;
     gap: 10px;
     flex: 1;
+    text-align: center;
 }
 
 .team img {
     width: 50px;
     height: 50px;
     object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.team img:hover {
+    transform: scale(1.1);
+}
+
+.score {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 1rem;
+    min-width: 60px;
+    text-align: center;
 }
 
 .match-time {
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 600;
     padding: 0 1rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
 }
 
 .match-footer {
-    padding: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
     border-top: 1px solid #e2e8f0;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #64748b;
+}
+
+.match-footer span {
+    display: flex;
+    align-items: center;
 }
 
 .match-footer i {
     margin-left: 5px;
 }
 
-.loading, .no-matches, .error {
+/* تنسيقات خاصة بصفحة المباريات */
+.matches-container {
+    margin-top: 1rem;
+}
+
+/* تنسيقات خاصة بصفحة الرئيسية */
+.featured-matches .match-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.featured-matches .match-link {
+    display: block;
+    text-align: center;
+    padding: 0.8rem;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.featured-matches .match-link:hover {
+    background-color: var(--primary-dark);
+}
+
+/* حالات التحميل والرسائل */
+.loading-matches,
+.no-matches,
+.error-message {
     grid-column: 1 / -1;
     text-align: center;
     padding: 2rem;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
 }
 
-.error {
-    color: var(--live-color);
+.loading-matches i,
+.no-matches i {
+    font-size: 2rem;
+    color: var(--primary-color);
 }
 
-.error button {
+.no-matches i {
+    color: #94a3b8;
+}
+
+.error-message {
+    color: var(--error-color);
+}
+
+.error-message button {
     margin-top: 1rem;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.5rem;
     background-color: var(--primary-color);
     color: var(--light-text);
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    transition: background-color 0.3s ease;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .filters {
+.error-message button:hover {
+    background-color: var(--primary-dark);
+}
+
+/* تنسيقات للهواتف */
+@media (max-width: 768px) {
+    .matches-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .matches-main .filters {
         flex-direction: column;
         align-items: stretch;
     }
     
-    .date-filter {
+    .matches-main .date-filter {
         justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .matches-grid {
+        grid-template-columns: 1fr;
     }
     
-    .matches-container {
-        grid-template-columns: 1fr;
+    .team img {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .score {
+        font-size: 1.2rem;
+        min-width: 50px;
     }
 }
