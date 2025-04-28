@@ -96,10 +96,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     MatchRenderer.init();
     
-    // للاختبار (يمكن حذفها لاحقاً)
-    FootballAPI.getMatchesByDate('2025-04-28')
-      .then(data => console.log('Test API call:', data))
-      .catch(error => console.error('Test API error:', error));
+  
   });
 </script>
     <script>
