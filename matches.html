@@ -102,5 +102,11 @@
       .catch(error => console.error('Test API error:', error));
   });
 </script>
+    const importantLeagues = matches.filter(match => 
+  match.league_type === "أوروبي" || 
+  match.league_type === "سعودي" || 
+  match.league_type === "آسيوي" || 
+  match.league_type === "مغربي"
+);
 </body>
 </html>
