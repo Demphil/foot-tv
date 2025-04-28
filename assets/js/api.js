@@ -22,7 +22,41 @@ async function fetchWithCache(endpoint, params = {}) {
       return data;
     }
   }
+try {
+    // بناء URL الطلب
+    const url = `${BASE_URL}/${endpoint}${params ? `?${new URLSearchParams(params)}` : ''}`;
+    
+    // إرسال الطلب إلى API
+    const response = await fetch(url, {
+      headers: {
+        'X-Auth-Token': API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      mode: 'cors'
+    });
 
+    // معالجة الأخطاء
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP Error: ${response.status}`);
+    }
+
+    // معالجة البيانات الناجحة
+    const data = await response.json();
+
+    // تصفية المباريات حسب الدوريات المهمة
+    if (endpoint.includes('matches') || endpoint.includes('competitions')) {
+      data.matches = data.matches?.filter(match => 
+        IMPORTANT_LEAGUES.has(match.competition?.code)
+      ) || [];
+    }
+
+    // تخزين البيانات في الذاكرة المؤقتة
+    sessionStorage.setItem(cacheKey, JSON.stringify({
+      data,
+      timestamp: now
+    }));
     return data;
 
   } catch (error) {
