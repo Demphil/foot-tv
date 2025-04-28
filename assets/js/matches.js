@@ -1,274 +1,120 @@
 import { FootballAPI } from './api.js';
-const MatchRenderer = {
-    elements: {
-        todayContainer: null,
-        tomorrowContainer: null,
-        loadingIndicator: null,
-        errorContainer: null,
-        dateFilter: null,
-        leagueFilter: null
-    },
 
-    // معرّفات الدوريات المهمة (رموز football-data.org)
-    IMPORTANT_LEAGUES: new Set([
-        'PL',    // الدوري الإنجليزي الممتاز
-        'PD',    // الدوري الإسباني
-        'SA',    // الدوري الإيطالي
-        'BL1',   // الدوري الألماني
-        'FL1',   // الدوري الفرنسي
-        'SAU',   // الدوري السعودي
-        'CL',    // دوري أبطال أوروبا
-        'MAR1'   // الدوري المغربي (يجب التأكد من الرمز)
-    ]),
+document.addEventListener('DOMContentLoaded', async () => {
+    // عناصر DOM
+    const matchesContainer = document.getElementById('matches-container');
+    const todayBtn = document.getElementById('today-btn');
+    const tomorrowBtn = document.getElementById('tomorrow-btn');
+    const weekBtn = document.getElementById('week-btn');
+    const leagueSelect = document.getElementById('league-select');
 
-    init: async function() {
-        this.cacheElements();
-        await this.loadMatches();
-        this.setupEventListeners();
-    },
-
-    cacheElements: function() {
-        this.elements = {
-            todayContainer: document.getElementById('today-matches'),
-            tomorrowContainer: document.getElementById('tomorrow-matches'),
-            loadingIndicator: document.getElementById('loading-indicator'),
-            errorContainer: document.getElementById('error-container'),
-            dateFilter: document.getElementById('date-filter'),
-            leagueFilter: document.getElementById('league-filter')
-        };
-    },
-
-    setupEventListeners: function() {
-        if (this.elements.dateFilter) {
-            this.elements.dateFilter.addEventListener('change', (e) => this.handleDateFilter(e));
-        }
-        
-        if (this.elements.leagueFilter) {
-            this.elements.leagueFilter.addEventListener('change', (e) => this.handleLeagueFilter(e));
-        }
-    },
-
-    handleDateFilter: async function(e) {
-        const date = e.target.value;
-        await this.renderMatches(date);
-    },
-
-    handleLeagueFilter: async function(e) {
-        const leagueCode = e.target.value;
-        await this.renderMatches(null, leagueCode);
-    },
-
-    loadMatches: async function() {
+    // جلب وتعبئة قائمة البطولات
+    async function loadLeagues() {
         try {
-            this.showLoading();
+            const data = await FootballAPI.getLeagues();
+            const leagues = data.response;
             
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
-            const [todayMatches, tomorrowMatches] = await Promise.all([
-                this.getFilteredMatches(this.formatDate(today)),
-                this.getFilteredMatches(this.formatDate(tomorrow))
-            ]);
-            
-            this.renderMatchesByDate(todayMatches, 'today');
-            this.renderMatchesByDate(tomorrowMatches, 'tomorrow');
-            
+            leagues.forEach(league => {
+                const option = document.createElement('option');
+                option.value = league.league.id;
+                option.textContent = league.league.name;
+                leagueSelect.appendChild(option);
+            });
         } catch (error) {
-            console.error('Failed to load matches:', error);
-            this.showError(error);
-        } finally {
-            this.hideLoading();
+            console.error('Error loading leagues:', error);
         }
-    },
-
-  getFilteredMatches: async function(date) {
-    try {
-        if (!window.FootballAPI && !FootballAPI) {
-            throw new Error('FootballAPI غير معروف - تأكد من استيراده بشكل صحيح');
-        }
-        
-        const api = window.FootballAPI || FootballAPI;
-        const response = await api.getMatchesByDate(date);
-        
-        if (!response || !response.matches) {
-            throw new Error('استجابة API غير صالحة');
-        }
-        
-        return response.matches.filter(match => 
-            this.IMPORTANT_LEAGUES.has(match.competition?.code)
-        ) || [];
-        
-    } catch (error) {
-        console.error('Error fetching matches:', error);
-        return this.getFallbackMatches();
     }
-},
 
-    getFallbackMatches: function() {
-        return [
-            {
-                competition: { 
-                    code: 'SAU',
-                    name: "الدوري السعودي",
-                    emblem: "assets/images/default-league.png"
-                },
-                homeTeam: { 
-                    name: "الهلال",
-                    shortName: "الهلال",
-                    crest: "assets/images/default-team.png"
-                },
-                awayTeam: { 
-                    name: "النصر",
-                    shortName: "النصر",
-                    crest: "assets/images/default-team.png"
-                },
-                utcDate: new Date().toISOString(),
-                status: "FINISHED",
-                venue: "ملعب الملك فهد",
-                score: {
-                    fullTime: { home: 0, away: 0 }
-                }
+    // جلب وعرض المباريات حسب التاريخ
+    async function loadMatches(date) {
+        try {
+            matchesContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> جاري تحميل المباريات...</div>';
+            
+            const data = await FootballAPI.getMatchesByDate(date);
+            const matches = data.response;
+            
+            if (matches.length === 0) {
+                matchesContainer.innerHTML = '<div class="no-matches">لا توجد مباريات في هذا التاريخ</div>';
+                return;
             }
-        ];
-    },
-
-    renderMatchesByDate: function(matches, type) {
-        const container = type === 'today' 
-            ? this.elements.todayContainer 
-            : this.elements.tomorrowContainer;
-        
-        if (!container) {
-            console.error(`Container not found for ${type}`);
-            return;
-        }
-        
-        if (!matches || matches.length === 0) {
-            container.innerHTML = this.getNoMatchesHTML();
-            return;
-        }
-        
-        container.innerHTML = matches.map(match => this.getMatchHTML(match)).join('');
-    },
-
-    getMatchHTML: function(match) {
-        const leagueLogo = match.competition.emblem || 'assets/images/default-league.png';
-        const homeLogo = match.homeTeam.crest || 'assets/images/default-team.png';
-        const awayLogo = match.awayTeam.crest || 'assets/images/default-team.png';
-        const venueName = match.venue || 'ملعب غير معروف';
-
-        const matchTime = new Date(match.utcDate).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-        });
-
-        const statusClass = match.status.toLowerCase().replace('_', '-');
-        let score = '-';
-        if (match.score?.fullTime?.home !== undefined && match.score?.fullTime?.away !== undefined) {
-            score = `${match.score.fullTime.home} - ${match.score.fullTime.away}`;
-        }
-
-        return `
-            <div class="match-card ${statusClass}">
-                <div class="match-header">
-                    <span class="league">
-                        <img src="${leagueLogo}" 
-                            alt="${match.competition.name}"
-                            onerror="this.src='assets/images/default-league.png'">
-                        ${match.competition.name}
-                    </span>
-                    <span class="status">${this.getStatusText(match.status)}</span>
-                </div>
-                <div class="teams">
-                    <div class="team home-team">
-                        <img src="${homeLogo}" 
-                            alt="${match.homeTeam.shortName || match.homeTeam.name}"
-                            onerror="this.src='assets/images/default-team.png'">
-                        <span>${match.homeTeam.shortName || match.homeTeam.name}</span>
+            
+            matchesContainer.innerHTML = matches.map(match => `
+                <div class="match-card ${match.fixture.status.short === 'NS' ? 'upcoming' : match.fixture.status.short === 'LIVE' ? 'live' : 'finished'}">
+                    <div class="match-header">
+                        <span class="league">${match.league.name}</span>
+                        <span class="status">${match.fixture.status.long}</span>
                     </div>
-                    <div class="score">
-                        ${score}
+                    <div class="teams">
+                        <div class="team home-team">
+                            <img src="${match.teams.home.logo}" alt="${match.teams.home.name}">
+                            <span>${match.teams.home.name}</span>
+                        </div>
+                        <div class="match-time">
+                            ${match.fixture.status.short === 'NS' ? 
+                                new Date(match.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 
+                                match.goals.home !== undefined ? `${match.goals.home} - ${match.goals.away}` : 'VS'}
+                        </div>
+                        <div class="team away-team">
+                            <img src="${match.teams.away.logo}" alt="${match.teams.away.name}">
+                            <span>${match.teams.away.name}</span>
+                        </div>
                     </div>
-                    <div class="team away-team">
-                        <img src="${awayLogo}" 
-                            alt="${match.awayTeam.shortName || match.awayTeam.name}"
-                            onerror="this.src='assets/images/default-team.png'">
-                        <span>${match.awayTeam.shortName || match.awayTeam.name}</span>
+                    <div class="match-footer">
+                        <span class="venue"><i class="fas fa-map-marker-alt"></i> ${match.fixture.venue.name}</span>
                     </div>
                 </div>
-                <div class="match-footer">
-                    <span class="time">
-                        <i class="far fa-clock"></i>
-                        ${matchTime}
-                    </span>
-                    <span class="venue">
-                        <i class="fas fa-map-marker-alt"></i>
-                        ${venueName}
-                    </span>
+            `).join('');
+        } catch (error) {
+            matchesContainer.innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>حدث خطأ في جلب البيانات. يرجى المحاولة لاحقاً</p>
+                    <button onclick="location.reload()">إعادة المحاولة</button>
                 </div>
-            </div>
-        `;
-    },
-
-    getStatusText: function(status) {
-        const statusMap = {
-            'SCHEDULED': 'مقررة',
-            'LIVE': 'مباشر',
-            'IN_PLAY': 'جارية',
-            'PAUSED': 'معلقة',
-            'FINISHED': 'انتهت',
-            'POSTPONED': 'مؤجلة',
-            'SUSPENDED': 'معلقة',
-            'CANCELED': 'ملغاة'
-        };
-        return statusMap[status] || status;
-    },
-
-    getNoMatchesHTML: function() {
-        return `
-            <div class="no-matches">
-                <i class="far fa-futbol"></i>
-                <p>لا توجد مباريات</p>
-            </div>
-        `;
-    },
-
-    showLoading: function() {
-        if (this.elements.loadingIndicator) {
-            this.elements.loadingIndicator.style.display = 'block';
+            `;
+            console.error('Error loading matches:', error);
         }
-    },
-
-    hideLoading: function() {
-        if (this.elements.loadingIndicator) {
-            this.elements.loadingIndicator.style.display = 'none';
-        }
-    },
-
-    showError: function(error) {
-    const errorMsg = error.message.includes('FootballAPI') ? 
-        'حدث خطأ في تحميل بيانات المباريات. يرجى تحديث الصفحة.' : 
-        error.message;
-    
-    if (this.elements.errorContainer) {
-        this.elements.errorContainer.innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>${errorMsg}</p>
-                <button class="retry-btn">إعادة المحاولة</button>
-            </div>
-        `;
-        this.elements.errorContainer.style.display = 'block';
-        this.elements.errorContainer.querySelector('.retry-btn')
-            .addEventListener('click', () => this.loadMatches());
     }
-},
 
-    formatDate: function(date) {
-        return date.toISOString().split('T')[0];
-    }
-};
+    // معالجة أحداث الأزرار
+    todayBtn.addEventListener('click', () => {
+        todayBtn.classList.add('active');
+        tomorrowBtn.classList.remove('active');
+        weekBtn.classList.remove('active');
+        const today = new Date().toISOString().split('T')[0];
+        loadMatches(today);
+    });
 
-// التصدير الرئيسي
-export { MatchRenderer };
+    tomorrowBtn.addEventListener('click', () => {
+        tomorrowBtn.classList.add('active');
+        todayBtn.classList.remove('active');
+        weekBtn.classList.remove('active');
+        const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0];
+        loadMatches(tomorrow);
+    });
+
+    weekBtn.addEventListener('click', () => {
+        weekBtn.classList.add('active');
+        todayBtn.classList.remove('active');
+        tomorrowBtn.classList.remove('active');
+        // هنا يمكنك إضافة دالة لجلب مباريات الأسبوع
+    });
+
+    // معالجة حدث تغيير البطولة
+    leagueSelect.addEventListener('change', (e) => {
+        if (e.target.value !== 'all') {
+            const currentDate = document.querySelector('.date-filter button.active').id.split('-')[0];
+            const date = currentDate === 'today' ? 
+                new Date().toISOString().split('T')[0] : 
+                new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0];
+            
+            // جلب مباريات البطولة المحددة
+            // يمكنك تطوير هذه الوظيفة حسب احتياجاتك
+        }
+    });
+
+    // تحميل البيانات الأولية
+    await loadLeagues();
+    const today = new Date().toISOString().split('T')[0];
+    loadMatches(today);
+});
