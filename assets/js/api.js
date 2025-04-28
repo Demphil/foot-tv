@@ -3,23 +3,23 @@
 // دالة مساعدة لجلب المفتاح من مصادر مختلفة
 const getApiKey = () => {
   // 1. محاولة جلب المفتاح من متغيرات بيئة Vite (للتطوير المحلي)
-  if (import.meta.env?.VITE_FOOTBALL_DATA_API_KEY) {
-    return import.meta.env.VITE_FOOTBALL_DATA_API_KEY;
+  if (import.meta.env?.VITE_FOOTBALL_DATA_KEY) {
+    return import.meta.env.VITE_FOOTBALL_DATA_KEY;
   }
 
   // 2. محاولة جلب المفتاح من window.ENV (للاستضافة مثل GitHub Pages)
-  if (window.ENV?.FOOTBALL_DATA_API_KEY) {
-    return window.ENV.FOOTBALL_DATA_API_KEY;
+  if (window.ENV?.FOOTBALL_DATA_KEY) {
+    return window.ENV.FOOTBALL_DATA_KEY;
   }
 
   // 3. محاولة جلب المفتاح من localStorage (للتخزين المحلي)
-  if (localStorage.getItem('FOOTBALL_DATA_API_KEY')) {
-    return localStorage.getItem('FOOTBALL_DATA_API_KEY');
+  if (localStorage.getItem('FOOTBALL_DATA_KEY')) {
+    return localStorage.getItem('FOOTBALL_DATA_KEY');
   }
 
   // 4. استخدام مفتاح افتراضي (لأغراض التطوير فقط)
   console.warn('Warning: Using default API key - for development only');
-  return 'YOUR_DEFAULT_API_KEY_HERE';
+  return 'FOOTBALL_DATA_KEY';
 };
 
 const API_KEY = getApiKey();
@@ -155,7 +155,7 @@ const FootballAPI = {
    * @param {string} key - المفتاح الجديد
    */
   setApiKey: (key) => {
-    localStorage.setItem('FOOTBALL_DATA_API_KEY', key);
+    localStorage.setItem('FOOTBALL_DATA_KEY', key);
     sessionStorage.clear(); // مسح الذاكرة المؤقتة عند تغيير المفتاح
     console.log('API key updated successfully');
   },
@@ -165,7 +165,7 @@ const FootballAPI = {
    * @returns {boolean} - true إذا كان المفتاح صالحاً
    */
   checkApiKey: () => {
-    if (API_KEY === 'YOUR_DEFAULT_API_KEY_HERE') {
+    if (API_KEY === 'FOOTBALL_DATA_KEY') {
       console.error('لم يتم تعيين مفتاح API، الرجاء إضافة المفتاح في ملف .env');
       return false;
     }
