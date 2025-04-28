@@ -1,28 +1,23 @@
 // assets/js/api.js
 const API_KEY = (() => {
-  // أولوية استيراد المفتاح من البيئات المختلفة
   if (import.meta.env?.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
-  if (window.ENV?.RAPIDAPI_KEY) return window.ENV.RAPIDAPI_KEY;
-  if (localStorage.getItem('RAPIDAPI_KEY')) return localStorage.getItem('RAPIDAPI_KEY');
-  return '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'; // مفتاح افتراضي للتطوير
+  if (window.ENV?.FOOTBALL_DATA_KEY) return window.ENV.FOOTBALL_DATA_KEY;
+  if (localStorage.getItem('FOOTBALL_DATA_KEY')) return localStorage.getItem('FOOTBALL_DATA_KEY');
+  return 'YOUR_DEFAULT_API_KEY'; // استبدله بمفتاحك من football-data.org
 })();
 
-const API_HOST = 'sportapi7.p.rapidapi.com';
-const BASE_URL = 'https://sportapi7.p.rapidapi.com/api/v1';
+const BASE_URL = 'https://api.football-data.org/v4';
 const CACHE_DURATION = 15 * 60 * 1000; // 15 دقيقة
 
-// معرّفات الدوريات المهمة
+// معرّفات الدوريات المهمة (يجب تحديثها حسب معرّفات football-data.org)
 const IMPORTANT_LEAGUES = new Set([
-  // الدوريات الأوروبية
-  39,    // الدوري الإنجليزي
-  140,   // الدوري الإسباني
-  135,   // الدوري الإيطالي
-  78,    // الدوري الألماني
-  61,    // الدوري الفرنسي
-  
-  // دوريات أخرى مطلوبة
-  564,   // الدوري السعودي
-  350    // الدوري المغربي
+  'PL',    // الدوري الإنجليزي
+  'PD',    // الدوري الإسباني
+  'SA',    // الدوري الإيطالي
+  'BL1',   // الدوري الألماني
+  'FL1',   // الدوري الفرنسي
+  'DZ1',   // الدوري المغربي (قد تحتاج لتأكيد المعرّف)
+  'SAU'    // الدوري السعودي (قد تحتاج لتأكيد المعرّف)
 ]);
 
 async function fetchWithCache(endpoint, params = {}) {
@@ -38,11 +33,11 @@ async function fetchWithCache(endpoint, params = {}) {
   }
 
   try {
-    const url = `${BASE_URL}/${endpoint}?${new URLSearchParams(params)}`;
+    const url = `${BASE_URL}/${endpoint}${params ? `?${new URLSearchParams(params)}` : ''}`;
     const response = await fetch(url, {
       headers: {
-        'X-RapidAPI-Host': API_HOST,
-        'X-RapidAPI-Key': API_KEY
+        'X-Auth-Token': API_KEY,
+        'Content-Type': 'application/json'
       }
     });
 
@@ -53,10 +48,10 @@ async function fetchWithCache(endpoint, params = {}) {
 
     const data = await response.json();
     
-    // تصفية البيانات للدوريات المهمة فقط إذا كانت استجابة المباريات
-    if (endpoint.includes('matches') || endpoint.includes('fixtures')) {
-      data.response = data.response?.filter(event => 
-        IMPORTANT_LEAGUES.has(event.league?.id)
+    // تصفية البيانات للدوريات المهمة
+    if (endpoint.includes('matches') || endpoint.includes('competitions')) {
+      data.matches = data.matches?.filter(match => 
+        IMPORTANT_LEAGUES.has(match.competition?.code)
       ) || [];
     }
 
@@ -74,44 +69,41 @@ async function fetchWithCache(endpoint, params = {}) {
 }
 
 export const FootballAPI = {
-  // الحصول على مباريات حسب التاريخ مع تصفية الدوريات
+  // الحصول على مباريات حسب التاريخ
   getMatchesByDate: async (date) => {
-    return fetchWithCache('event/football/matches', { date });
+    return fetchWithCache('matches', { date });
   },
 
-  // الحصول على مباريات الدوري المحدد
-  getLeagueMatches: async (leagueId, season = new Date().getFullYear()) => {
-    if (!IMPORTANT_LEAGUES.has(Number(leagueId))) {
+  // الحصول على مباريات دوري معين
+  getLeagueMatches: async (leagueCode) => {
+    if (!IMPORTANT_LEAGUES.has(leagueCode)) {
       throw new Error('هذا الدوري غير مدرج في القائمة المطلوبة');
     }
-    return fetchWithCache('event/football/matches', { 
-      league: leagueId,
-      season
-    });
+    return fetchWithCache(`competitions/${leagueCode}/matches`);
   },
 
-  // الحصول على المباريات الحية (الدوريات المهمة فقط)
+  // الحصول على المباريات الحية
   getLiveMatches: async () => {
-    const data = await fetchWithCache('events/live', { sport: 'football' });
-    data.response = data.response?.filter(event => 
-      IMPORTANT_LEAGUES.has(event.league?.id)
+    const data = await fetchWithCache('matches', { status: 'LIVE' });
+    data.matches = data.matches?.filter(match => 
+      IMPORTANT_LEAGUES.has(match.competition?.code)
     ) || [];
     return data;
   },
 
   // إدارة المفتاح API
   setApiKey: (key) => {
-    localStorage.setItem('RAPIDAPI_KEY', key);
+    localStorage.setItem('FOOTBALL_DATA_KEY', key);
     sessionStorage.clear();
   },
 
   // إضافة دوري جديد للقائمة المهمة
-  addImportantLeague: (leagueId) => {
-    IMPORTANT_LEAGUES.add(Number(leagueId));
+  addImportantLeague: (leagueCode) => {
+    IMPORTANT_LEAGUES.add(leagueCode);
   },
 
   // إزالة دوري من القائمة المهمة
-  removeImportantLeague: (leagueId) => {
-    IMPORTANT_LEAGUES.delete(Number(leagueId));
+  removeImportantLeague: (leagueCode) => {
+    IMPORTANT_LEAGUES.delete(leagueCode);
   }
 };
