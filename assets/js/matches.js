@@ -63,18 +63,24 @@ const MatchRenderer = {
     }
   },
 
-  renderMatchesByDate: function(matches, type) {
-    const container = type === 'today' 
-      ? this.elements.todayContainer 
-      : this.elements.tomorrowContainer;
-    
-    if (!matches || matches.length === 0) {
-      container.innerHTML = this.getNoMatchesHTML();
-      return;
-    }
-    
-    container.innerHTML = matches.map(match => this.getMatchHTML(match)).join('');
-  },
+  // تعديل دالة renderMatchesByDate:
+renderMatchesByDate: function(matches, type) {
+  const container = type === 'today' 
+    ? document.getElementById('today-matches') 
+    : document.getElementById('tomorrow-matches');
+  
+  if (!container) {
+    console.error(`Container not found for ${type}`);
+    return;
+  }
+  
+  if (!matches || matches.length === 0) {
+    container.innerHTML = this.getNoMatchesHTML();
+    return;
+  }
+  
+  container.innerHTML = matches.map(match => this.getMatchHTML(match)).join('');
+}
 
   getMatchHTML: function(match) {
     return `
