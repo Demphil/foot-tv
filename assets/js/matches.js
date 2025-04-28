@@ -11,6 +11,18 @@ const MatchRenderer = {
         leagueFilter: null
     },
 
+    // معرّفات الدوريات المهمة
+    IMPORTANT_LEAGUES: new Set([
+        39,    // الدوري الإنجليزي
+        140,   // الدوري الإسباني
+        135,   // الدوري الإيطالي
+        78,    // الدوري الألماني
+        61,    // الدوري الفرنسي
+        564,   // الدوري السعودي
+        2,     // دوري أبطال آسيا
+        350    // الدوري المغربي
+    ]),
+
     init: async function() {
         this.cacheElements();
         await this.loadMatches();
@@ -57,12 +69,12 @@ const MatchRenderer = {
             tomorrow.setDate(tomorrow.getDate() + 1);
             
             const [todayMatches, tomorrowMatches] = await Promise.all([
-                FootballAPI.getMatchesByDate(this.formatDate(today)),
-                FootballAPI.getMatchesByDate(this.formatDate(tomorrow))
+                this.getFilteredMatches(this.formatDate(today)),
+                this.getFilteredMatches(this.formatDate(tomorrow))
             ]);
             
-            this.renderMatchesByDate(todayMatches.response, 'today');
-            this.renderMatchesByDate(tomorrowMatches.response, 'tomorrow');
+            this.renderMatchesByDate(todayMatches, 'today');
+            this.renderMatchesByDate(tomorrowMatches, 'tomorrow');
             
         } catch (error) {
             console.error('Failed to load matches:', error);
@@ -70,6 +82,48 @@ const MatchRenderer = {
         } finally {
             this.hideLoading();
         }
+    },
+
+    // دالة جديدة لتصفية المباريات
+    getFilteredMatches: async function(date) {
+        try {
+            const response = await FootballAPI.getMatchesByDate(date);
+            return response.response?.filter(match => 
+                this.IMPORTANT_LEAGUES.has(match.league?.id)
+            ) || [];
+        } catch (error) {
+            console.error('Error fetching matches:', error);
+            return this.getFallbackMatches();
+        }
+    },
+
+    // بيانات احتياطية عند فشل الاتصال
+    getFallbackMatches: function() {
+        return [
+            {
+                league: { 
+                    id: 564, 
+                    name: "الدوري السعودي",
+                    logo: "assets/images/default-league.png"
+                },
+                teams: { 
+                    home: { 
+                        name: "الهلال",
+                        logo: "assets/images/default-team.png"
+                    }, 
+                    away: { 
+                        name: "النصر",
+                        logo: "assets/images/default-team.png"
+                    } 
+                },
+                fixture: {
+                    date: new Date().toISOString(),
+                    status: { short: "FT", long: "مباراة افتراضية" },
+                    venue: { name: "ملعب الملك فهد" }
+                },
+                goals: { home: 0, away: 0 }
+            }
+        ];
     },
 
     renderMatchesByDate: function(matches, type) {
@@ -193,10 +247,7 @@ const MatchRenderer = {
 // التصدير الأساسي
 export { MatchRenderer };
 
-// التهيئة عند تحميل الصفحة (اختياري)
+// التهيئة عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
     MatchRenderer.init();
 });
-
-// للاستخدام في وحدة التحكم (اختياري)
-window.MatchRenderer = MatchRenderer;
