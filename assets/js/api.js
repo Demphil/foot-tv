@@ -8,7 +8,7 @@ const API_KEY = (() => {
   return 'fallback-demo-key'; // للتطوير فقط
 })();
 
-const API_HOST = 'api-football-v1.p.rapidapi.com';
+const API_HOST = 'api-football-v3.p.rapidapi.com';
 const CACHE_DURATION = 15 * 60 * 1000; // 15 دقيقة
 
 async function fetchWithCache(endpoint, params = {}) {
@@ -23,21 +23,6 @@ async function fetchWithCache(endpoint, params = {}) {
     }
   }
 
-  try {
-    const response = await fetch(`https://${API_HOST}/v3/${endpoint}?${new URLSearchParams(params)}`, {
-      headers: {
-        'x-rapidapi-host': API_HOST,
-        'x-rapidapi-key': API_KEY
-      }
-    });
-
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const data = await response.json();
-    sessionStorage.setItem(cacheKey, JSON.stringify({
-      data,
-      timestamp: now
-    }));
     return data;
 
   } catch (error) {
