@@ -60,30 +60,34 @@
 
      <script type="module" src="assets/js/api.js"></script>
 <!-- للاستخدام مع GitHub Pages -->
-<script>
-  window.ENV = { RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438' };
-  // تهيئة البيئة
-  // استيراد الوحدات
+ <script type="module">
+  // Configuration
+  window.ENV = {
+    RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'
+  };
+
+  // Imports
   import { FootballAPI } from './assets/js/api.js';
   import { MatchRenderer } from './assets/js/matches.js';
 
-  // تحديث سنة حقوق النشر
+  // Update copyright year
   document.getElementById('current-year').textContent = new Date().getFullYear();
 
-  // تهيئة التطبيق
-  document.addEventListener('DOMContentLoaded', () => {
-    MatchRenderer.init();
-    
-
+  // Initialize app
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      await MatchRenderer.init();
+      
+      // Test API (dev only)
+     // يمكنك استبدال كود الاختبار بهذا إذا أردت:
+if (process.env.NODE_ENV === 'development') {
+  FootballAPI.getMatchesByDate('2025-04-28')
+    .then(/* ... */);
+}
+    } catch (error) {
+      console.error('Initialization error:', error);
+    }
   });
 </script>
-    <script>
-    const importantLeagues = matches.filter(match => 
-  match.league_type === "أوروبي" || 
-  match.league_type === "سعودي" || 
-  match.league_type === "آسيوي" || 
-  match.league_type === "مغربي"
-);
-    </script>
 </body>
 </html>
