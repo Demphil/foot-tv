@@ -16,19 +16,18 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js (No Cache)
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          # تم إزالة سطر cache تماماً بدلاً من تعطيله
 
-      - name: Initialize Minimal Project
+      - name: Initialize Project
         run: |
           mkdir -p data
-          echo '{"name":"ft-updater","private":true}' > package.json
+          echo '{"private":true}' > package.json
 
-      - name: Install Axios (No Lock)
-        run: npm install axios --no-package-lock --no-save --prefer-offline
+      - name: Install Axios
+        run: npm install axios --no-package-lock --no-save
 
       - name: Fetch and Process Matches
         env:
@@ -39,37 +38,38 @@ jobs:
           const fs = require('fs');
           const today = new Date().toISOString().split('T')[0];
           
+          const IMPORTANT_LEAGUES = new Set([39, 140, 135, 78, 61, 564, 2, 350]);
+          
           async function getMatches() {
             try {
-              console.log('🔍 جلب بيانات المباريات...');
               const { data } = await axios.get('https://api-football-v1.p.rapidapi.com/v3/fixtures', {
-                params: { date: today },
+                params: { date: today, timezone: 'Asia/Riyadh' },
                 headers: {
                   'x-rapidapi-host': 'api-football-v1.p.rapidapi.com',
                   'x-rapidapi-key': process.env.RAPIDAPI_KEY
                 }
               });
               
-              fs.writeFileSync('./data/matches.json', JSON.stringify(data, null, 2));
-              console.log('✅ تم التحديث بنجاح:', data.response?.length || 0, 'مباراة');
+              const filteredMatches = {
+                ...data,
+                response: data.response?.filter(fixture => 
+                  IMPORTANT_LEAGUES.has(fixture.league?.id)
+                ) || []
+              };
+              
+              fs.writeFileSync('./data/matches.json', JSON.stringify(filteredMatches, null, 2));
+              console.log('✅ تم حفظ', filteredMatches.response.length, 'مباراة');
             } catch (error) {
-              console.error('❌ فشل الاتصال:', error.message);
+              console.error('❌ فشل:', error.message);
               fs.writeFileSync('./data/matches.json', JSON.stringify({
-                response: [{
-                  fixture: { 
-                    id: Date.now(),
-                    date: today,
-                    status: { short: 'FT', long: 'Fallback Data' }
-                  },
-                  teams: { 
-                    home: { name: 'فريق 1' }, 
-                    away: { name: 'فريق 2' } 
-                  },
-                  league: { name: 'بدون اتصال بالإنترنت' },
-                  goals: { home: 0, away: 0 }
-                }]
+                response: [
+                  {
+                    league: { id: 564, name: 'الدوري السعودي (بيانات محلية)' },
+                    teams: { home: { name: 'الهلال' }, away: { name: 'النصر' } },
+                    goals: { home: 0, away: 0 }
+                  }
+                ]
               }, null, 2));
-              console.log('⚠️ تم استخدام بيانات محلية');
             }
           }
           getMatches();
@@ -82,7 +82,4 @@ jobs:
           git config --global user.email "actions@users.noreply.github.com"
           git add data/matches.json
           git diff --quiet || git commit -m "تحديث بيانات المباريات [auto]"
-          
-      - name: Push Changes
-        if: success()
-        run: git push
+          git push
