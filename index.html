@@ -62,13 +62,34 @@
 <!-- للاستخدام مع GitHub Pages -->
 <script>
   window.ENV = { RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438' };
+ <script type="module">
+  // تهيئة البيئة
+  window.ENV = {
+    RAPIDAPI_KEY: '795f377634msh4be097ebbb6dce3p1bf238jsn583f1b9cf438'
+  };
+
+  // استيراد الوحدات
+  import { FootballAPI } from './assets/js/api.js';
+  import { MatchRenderer } from './assets/js/matches.js';
+
+  // تحديث سنة حقوق النشر
+  document.getElementById('current-year').textContent = new Date().getFullYear();
+
+  // تهيئة التطبيق
+  document.addEventListener('DOMContentLoaded', () => {
+    MatchRenderer.init();
+    
+    // للاختبار (يمكن حذفها لاحقاً)
+    FootballAPI.getMatchesByDate('2025-04-28')
+      .then(data => console.log('Test API call:', data))
+      .catch(error => console.error('Test API error:', error));
+  });
 </script>
-<script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/matches.js"></script>
-     
-  <script type="module">
-    import FootballAPI from './assets/js/api.js';
-    import './assets/js/matches.js';
-  </script>
+    const importantLeagues = matches.filter(match => 
+  match.league_type === "أوروبي" || 
+  match.league_type === "سعودي" || 
+  match.league_type === "آسيوي" || 
+  match.league_type === "مغربي"
+);
 </body>
 </html>
